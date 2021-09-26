@@ -1,0 +1,30 @@
+  setTimer0(1000);
+  setTimer1(500);
+  while (1)
+  {
+    /* USER CODE END WHILE */
+	  if(timer0_flag){
+		  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
+		  second ++;
+		  if(second>=60){
+			  second = 0;
+			  minute ++;
+		  }
+		  if(minute>=60){
+			  minute =0;
+			  hour++;
+		  }
+		  if(hour>=24){
+			  hour = 0;
+		  }
+		  updateClockBuffer();
+		  setTimer0(1000);
+	  }
+	  if(timer1_flag){
+		  update7SEG(led_index);
+		  led_index = (led_index+1)%4;
+		  setTimer1(500);
+	  }
+
+    /* USER CODE BEGIN 3 */
+  }

@@ -1,0 +1,15 @@
+rp1:
+- If in line 1 of the code is miss, so LED_RED never be toggled. Because in time_run, It will check timer0_counter > 0 but we dont set value different from 0 to timer0_counter. So timer0_flag will never be set to 1. 
+
+rp2:
+- If in line 1 is setTimer0(1), then timer0_counter is 1. After that the first interrupt execute, It will check line
+"If (timer0_counter > 0) -> It's true 1 > 0"
+then 
+"timer0_counter --" -> timer0_counter = 0;
+then check
+"timer0_counter == 0" -> It's true -> Set timer0_flag = 1;
+So then, In While(1) loop in Main function, LED_RED will be toggled.
+Then setTimer0(2000) will reset timer0_counter and timer0_flag.
+
+rp3:
+- timer0_counter will be changed from 0 -> 1 -> 10. It mean never toggle or 1 -> 10 interrupt time ~ 10 -> 100ms to the first LED_RED toggle.

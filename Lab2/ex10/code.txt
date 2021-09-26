@@ -1,0 +1,62 @@
+  set_Timer0(10);
+  set_Timer1(200);
+  while(1){
+	  if(timer0_flag){
+		  //If all columns are set, delay 5s
+		  updateLEDMatrix(index_led_matrix);
+		  index_led_matrix = (index_led_matrix+1)%MAX_LED_MATRIX;
+		  set_Timer0(10);
+	  }
+	  if(timer1_flag){
+		  shift_index = (shift_index +1)%MAX_LED_MATRIX;
+		  set_Timer1(200);
+	  }
+  }
+
+
+
+void updateLEDMatrix(int index){
+	/*
+	 * A character
+	 * 		      * *
+	 * 		    * * * *
+	 * 		  * *     * *
+	 * 		* *         * *
+	 * 		* * * * * * * *
+	 * 		* * * * * * * *
+	 * 		* *         * *
+	 * 		* *         * *
+	 */
+	// matrix_buffer[] = { 0x18,0x3C,0x66,0xC3,0xFF,0xFF,0xC3,0xC3}
+	// clear all matrix
+	clear_col(index);
+	switch (index) {
+		case 0:
+			maxtrix_buffer[0] = 0x18>>shift_index;
+			break;
+		case 1:
+			maxtrix_buffer[1] = 0x3C>>shift_index;
+			break;
+		case 2:
+			maxtrix_buffer[2] = 0x66>>shift_index;
+			break;
+		case 3:
+			maxtrix_buffer[3] = 0xC3>>shift_index;
+			break;
+		case 4:
+			maxtrix_buffer[4] = 0xFF>>shift_index;
+			break;
+		case 5:
+			maxtrix_buffer[5] = 0xFF>>shift_index;
+			break;
+		case 6:
+			maxtrix_buffer[6] = 0xC3>>shift_index;
+			break;
+		case 7:
+			maxtrix_buffer[7] = 0xC3>>shift_index;
+			break;
+		default:
+			break;
+	}
+	display_col(index);
+}

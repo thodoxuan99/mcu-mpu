@@ -1,0 +1,24 @@
+  setTimer0(1000);
+  while (1)
+  {
+    /* USER CODE END WHILE */
+	  if(timer0_flag){
+		  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
+		  second ++;
+		  if(second>=60){
+			  second = 0;
+			  minute ++;
+		  }
+		  if(minute>=60){
+			  minute =0;
+			  hour++;
+		  }
+		  if(hour>=24){
+			  hour = 0;
+		  }
+		  updateClockBuffer();
+		  setTimer0(1000);
+	  }
+
+    /* USER CODE BEGIN 3 */
+  }

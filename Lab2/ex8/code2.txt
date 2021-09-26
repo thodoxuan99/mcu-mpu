@@ -1,0 +1,4 @@
+void setTimer1(int duration){
+	timer1_counter = duration/TIMER_CYCLE;
+	timer1_flag = 0;
+}

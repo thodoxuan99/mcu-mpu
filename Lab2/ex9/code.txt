@@ -1,0 +1,72 @@
+void clear_col(int index){
+	HAL_GPIO_WritePin(GPIOA, col_mask[0]|col_mask[1]|col_mask[2]|col_mask[3]|col_mask[4]|col_mask[5]|col_mask[6]|col_mask[7], GPIO_PIN_RESET);
+}
+void display_col(int col_index){
+	HAL_GPIO_WritePin(GPIOA, col_mask[col_index], GPIO_PIN_SET);
+	for (int var = 0; var < 8; ++var) {
+		if((0x01)&(maxtrix_buffer[col_index]>>var)){
+			HAL_GPIO_WritePin(GPIOB, row_mask[var], GPIO_PIN_SET);
+		}
+		else{
+			HAL_GPIO_WritePin(GPIOB, row_mask[var], GPIO_PIN_RESET);
+		}
+	}
+}
+// Update A character
+void updateLEDMatrix(int index){
+	/*
+	 * A character
+	 * 		      * *
+	 * 		    * * * *
+	 * 		  * *     * *
+	 * 		* *         * *
+	 * 		* * * * * * * *
+	 * 		* * * * * * * *
+	 * 		* *         * *
+	 * 		* *         * *
+	 */
+	// matrix_buffer[] = { 0x18,0x3C,0x66,0xC3,0xFF,0xFF,0xC3,0xC3}
+	// clear all matrix
+	clear_col(index);
+	switch (index) {
+		case 0:
+			maxtrix_buffer[0] = 0x18;
+			break;
+		case 1:
+			maxtrix_buffer[1] = 0x3C;
+			break;
+		case 2:
+			maxtrix_buffer[2] = 0x66;
+			break;
+		case 3:
+			maxtrix_buffer[3] = 0xC3;
+			break;
+		case 4:
+			maxtrix_buffer[4] = 0xFF;
+			break;
+		case 5:
+			maxtrix_buffer[5] = 0xFF;
+			break;
+		case 6:
+			maxtrix_buffer[6] = 0xC3;
+			break;
+		case 7:
+			maxtrix_buffer[7] = 0xC3;
+			break;
+		default:
+			break;
+	}
+	display_col(index);
+}
+
+
+
+  set_Timer0(10);
+  while(1){
+	  if(timer0_flag){
+		  //If all columns are set, delay 5s
+		  updateLEDMatrix(index_led_matrix);
+		  index_led_matrix = (index_led_matrix+1)%MAX_LED_MATRIX;
+		  set_Timer0(10);
+	  }
+  }

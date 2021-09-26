@@ -1,0 +1,19 @@
+int counter = 50;
+FlagStatus is_7segment_1 = SET;
+void HAL_TIM_PeriodElapsedCallback ( TIM_HandleTypeDef * htim ){
+	counter -- ;
+	if(counter <= 0){
+		counter = 50;
+		is_7segment_1 = !is_7segment_1;
+		if(is_7segment_1){
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, RESET);
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
+			display7SEG(1);
+		}
+		else{
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, SET);
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, RESET);
+			display7SEG(2);
+		}
+	}
+}
