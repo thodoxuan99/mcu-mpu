@@ -1,0 +1,159 @@
+uint8_t MAX_RED_COUNTER		= 5; //seconds
+uint8_t MAX_GREEN_COUNTER	= 3 ;
+uint8_t MAX_YELLOW_COUNTER 	= 2;
+
+
+
+
+uint8_t counter_down_left_right = 5;
+uint8_t counter_down_top_down = 3;
+uint8_t temp_counter = 0;
+
+/*
+ * 0: red
+ * 1: green
+ * 2: yellow
+ */
+uint8_t led_left_right = 0;
+uint8_t led_top_down = 1;
+
+
+uint8_t segment_index = 0;
+
+uint8_t keep_bt2_flag = 0;
+
+
+uint8_t stop_clk_minutes = 0;
+uint8_t stop_clk_seconds = 0;
+uint8_t stop_clk_1_100second = 0;
+
+uint16_t gpio_pinmask_led[] = {GPIO_PIN_1,GPIO_PIN_2,GPIO_PIN_3,GPIO_PIN_4,GPIO_PIN_5,GPIO_PIN_6};
+uint32_t  gpio_port_led_enable = GPIOA;
+
+uint16_t gpio_pinmask_enable_7segment[] = {GPIO_PIN_8,GPIO_PIN_9,GPIO_PIN_10,GPIO_PIN_11};
+uint32_t  gpio_port_enable = GPIOB;
+
+uint16_t gpio_pinmask_7seg[] = {GPIO_PIN_1,GPIO_PIN_2,GPIO_PIN_3,GPIO_PIN_4,GPIO_PIN_5,GPIO_PIN_6,GPIO_PIN_7};
+uint32_t gpio_port_7seg	= GPIOB;
+/*
+ * mode 0 : run normal clk
+ * mode 1 : increase hours
+ * mode 2 : increase minutes
+ * mode 3 : increase seconds
+ * mode 4 : run stop clk
+ */
+uint8_t mode = 0;
+
+
+void Clear_7Seg(){
+	HAL_GPIO_WritePin(gpio_port_7seg,  gpio_pinmask_7seg[0]|gpio_pinmask_7seg[1]|gpio_pinmask_7seg[2]|gpio_pinmask_7seg[3]|gpio_pinmask_7seg[4]|gpio_pinmask_7seg[5]|gpio_pinmask_7seg[6], GPIO_PIN_SET);
+}
+void display7SEG(uint8_t number){
+	Clear_7Seg();
+	switch (number) {
+		case 0:
+			/*
+			 * b'abcdefg = b'1111110
+			 */
+			HAL_GPIO_WritePin(gpio_port_7seg,  gpio_pinmask_7seg[0]|gpio_pinmask_7seg[1]|gpio_pinmask_7seg[2]|gpio_pinmask_7seg[3]|gpio_pinmask_7seg[4]|gpio_pinmask_7seg[5], GPIO_PIN_RESET);
+			break;
+		case 1:
+			/*
+			 * b'abcdefg = b'0110000
+			 */
+			HAL_GPIO_WritePin(gpio_port_7seg,  gpio_pinmask_7seg[1]|gpio_pinmask_7seg[2], GPIO_PIN_RESET);
+			break;
+		case 2:
+			/*
+			 * b'abcdefg = b'1101101
+			 */
+			HAL_GPIO_WritePin(gpio_port_7seg,  gpio_pinmask_7seg[0]|gpio_pinmask_7seg[1]|gpio_pinmask_7seg[3]|gpio_pinmask_7seg[4]|gpio_pinmask_7seg[6], GPIO_PIN_RESET);
+			break;
+		case 3:
+			/*
+			 * b'abcdefg = b'1111001
+			 */
+			HAL_GPIO_WritePin(gpio_port_7seg,  gpio_pinmask_7seg[0]|gpio_pinmask_7seg[1]|gpio_pinmask_7seg[2]|gpio_pinmask_7seg[3]|gpio_pinmask_7seg[6], GPIO_PIN_RESET);
+			break;
+		case 4:
+			/*
+			 * b'abcdefg = b'0110011
+			 */
+			HAL_GPIO_WritePin(gpio_port_7seg,  gpio_pinmask_7seg[1]|gpio_pinmask_7seg[2]|gpio_pinmask_7seg[5]|gpio_pinmask_7seg[6], GPIO_PIN_RESET);
+			break;
+		case 5:
+			/*
+			 * b'abcdefg = b'1011011
+			 */
+			HAL_GPIO_WritePin(gpio_port_7seg,  gpio_pinmask_7seg[0]|gpio_pinmask_7seg[2]|gpio_pinmask_7seg[3]|gpio_pinmask_7seg[5]|gpio_pinmask_7seg[6], GPIO_PIN_RESET);
+			break;
+		case 6:
+			/*
+			 * b'abcdefg = b'1011111
+			 */
+			HAL_GPIO_WritePin(gpio_port_7seg,  gpio_pinmask_7seg[0]|gpio_pinmask_7seg[2]|gpio_pinmask_7seg[3]|gpio_pinmask_7seg[4]|gpio_pinmask_7seg[5]|gpio_pinmask_7seg[6], GPIO_PIN_RESET);
+			break;
+		case 7:
+			/*
+			 * b'abcdefg = b'1110000
+			 */
+			HAL_GPIO_WritePin(gpio_port_7seg,  gpio_pinmask_7seg[0]|gpio_pinmask_7seg[1]|gpio_pinmask_7seg[2], GPIO_PIN_RESET);
+			break;
+		case 8:
+			/*
+			 * b'abcdefg = b'1111111
+			 */
+			HAL_GPIO_WritePin(gpio_port_7seg,  gpio_pinmask_7seg[0]|gpio_pinmask_7seg[1]|gpio_pinmask_7seg[2]|gpio_pinmask_7seg[3]|gpio_pinmask_7seg[4]|gpio_pinmask_7seg[5]|gpio_pinmask_7seg[6], GPIO_PIN_RESET);
+			break;
+		case 9:
+			/*
+			 * b'abcdefg = b'1111011
+			 */
+			HAL_GPIO_WritePin(gpio_port_7seg,  gpio_pinmask_7seg[0]|gpio_pinmask_7seg[1]|gpio_pinmask_7seg[2]|gpio_pinmask_7seg[3]|gpio_pinmask_7seg[5]|gpio_pinmask_7seg[6], GPIO_PIN_RESET);
+			break;
+		default:
+			break;
+	}
+}
+
+void clear_enable(void){
+	uint8_t no_enable = sizeof(gpio_pinmask_enable_7segment);
+	for (int var = 0; var < no_enable ; ++var) {
+		HAL_GPIO_WritePin(gpio_port_enable, gpio_pinmask_enable_7segment[var], GPIO_PIN_SET);
+	}
+}
+
+void set_enable(uint8_t index){
+	HAL_GPIO_WritePin(gpio_port_enable, gpio_pinmask_enable_7segment[index], GPIO_PIN_RESET);
+}
+void display7SEG_Index(uint8_t index , uint8_t number){
+	clear_enable();
+	display7SEG(number);
+	set_enable(index);
+}
+
+void display_7seg(){
+	uint8_t number;
+	if(get_flag_timer1()){
+		switch (segment_index){
+			case 0:
+				number = counter_down_left_right/10;
+				break;
+			case 1:
+				number = counter_down_left_right%10;
+				break;
+			case 2:
+				number = counter_down_top_down/10;
+				break;
+			case 3:
+				number = counter_down_top_down%10;
+				break;
+			default:
+				break;
+		}
+		display7SEG_Index(segment_index, number);
+		segment_index = (segment_index+1)%4;
+//			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
+		set_Timer1(10);
+	}
+}

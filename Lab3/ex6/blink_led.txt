@@ -1,0 +1,21 @@
+void blink_index(uint8_t color){
+	if(get_flag_timer2()){
+		switch (color) {
+			case 0:
+				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_1);
+				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
+				break;
+			case 1:
+				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_2);
+				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+				break;
+			case 2:
+				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_3);
+				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6);
+				break;
+			default:
+				break;
+		}
+		set_Timer2(500);
+	}
+}

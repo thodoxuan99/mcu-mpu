@@ -1,0 +1,76 @@
+/*
+ * input_processing.c
+ *
+ *  Created on: Sep 26, 2021
+ *      Author: thodo
+ */
+
+#include "main.h"
+
+#define N0_OF_BUTTONS		3
+#define DURATION_FOR_AUTO_INCREASING_1S 100
+#define DURATION_FOR_AUTO_INCREASING_3S 300
+#define BUTTON_GPIO_Port	GPIOA
+static uint16_t button_GPIO_PIN[] = {GPIO_PIN_7,GPIO_PIN_8,GPIO_PIN_9};
+static GPIO_PinState buttonBuffer [N0_OF_BUTTONS];
+static GPIO_PinState debounceButtonBuffer1[N0_OF_BUTTONS];
+static GPIO_PinState debounceButtonBuffer2[N0_OF_BUTTONS];
+static uint16_t counterForButtonPress[N0_OF_BUTTONS];
+static uint8_t flagForButtonPress1s[N0_OF_BUTTONS];
+static uint8_t flagForButtonPress3s[N0_OF_BUTTONS];
+
+void button_reading(void) {
+	for ( int i = 0; i < N0_OF_BUTTONS ; i ++) {
+		debounceButtonBuffer2[i] = debounceButtonBuffer1[i];
+		debounceButtonBuffer1[i] = HAL_GPIO_ReadPin(BUTTON_GPIO_Port,button_GPIO_PIN[i]);
+		if( debounceButtonBuffer1[i] == debounceButtonBuffer2[i]){
+			buttonBuffer[i] = debounceButtonBuffer1[i];
+		}
+		if( buttonBuffer[i] == GPIO_PIN_SET) {
+			counterForButtonPress[i]++;
+			if( counterForButtonPress[i] >= DURATION_FOR_AUTO_INCREASING_1S ) {
+//				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_SET);
+				flagForButtonPress1s[i] = 1;
+			}
+			if( counterForButtonPress[i] >= DURATION_FOR_AUTO_INCREASING_3S ) {
+//				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET);
+				flagForButtonPress3s[i] = 1;
+			}
+		}
+		else {
+			counterForButtonPress[i] = 0;
+		}
+	}
+}
+
+GPIO_PinState get_button_value ( uint8_t index ) {
+	if( index >= N0_OF_BUTTONS ) return 0xff ;
+	return buttonBuffer [ index ];
+}
+
+unsigned char get_flag_for_button_press_1s ( unsigned char index ) {
+	if( index >= N0_OF_BUTTONS ) return 0xff ;
+	return flagForButtonPress1s[ index ];
+}
+
+unsigned char clear_flag_for_button_press_1s ( unsigned char index ) {
+	if( index >= N0_OF_BUTTONS ) return 0xff ;
+	 flagForButtonPress1s[ index ] = 0;
+}
+
+
+unsigned char get_flag_for_button_press_3s ( unsigned char index ) {
+	if( index >= N0_OF_BUTTONS ) return 0xff ;
+	return flagForButtonPress3s[ index ];
+}
+
+unsigned char clear_flag_for_button_press_3s ( unsigned char index ) {
+	if( index >= N0_OF_BUTTONS ) return 0xff;
+	 flagForButtonPress3s[ index ] = 0;
+}
+
+
+unsigned char clear_counter_for_button_press ( unsigned char index ) {
+	if( index >= N0_OF_BUTTONS ) return 0xff ;
+	 counterForButtonPress[ index ] = 0;
+}
